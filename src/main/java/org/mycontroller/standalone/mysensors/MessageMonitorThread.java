@@ -15,6 +15,7 @@
  */
 package org.mycontroller.standalone.mysensors;
 
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.mycontroller.standalone.ObjectFactory;
 import org.mycontroller.standalone.gateway.MySensorsGatewayException;
 import org.mycontroller.standalone.gateway.IMySensorsGateway.GATEWAY_STATUS;
@@ -58,6 +59,7 @@ public class MessageMonitorThread implements Runnable {
             RawMessage rawMessage = ObjectFactory.getRawMessageQueue().getMessage();
             try {
                 processRawMessage.messageTypeSelector(rawMessage);
+                ObjectFactory.getmyOutputMessageQueue().putMessage(rawMessage);
             } catch (MySensorsGatewayException ex) {
                 if (ex.getMessage().contains(GATEWAY_STATUS.GATEWAY_ERROR.toString())) {
                     _logger.error("Problem with Gateway!, RawMessage[{}], Error:[{}]", rawMessage, ex.getMessage());
@@ -74,12 +76,33 @@ public class MessageMonitorThread implements Runnable {
         }
     }
 
+    private void processOutputMessage() {
+        while (!ObjectFactory.getmyOutputMessageQueue().isEmpty() && !isTerminationIssued()) {
+            RawMessage rawMessage = ObjectFactory.getmyOutputMessageQueue().getMessage();
+            try {               
+                ObjectFactory.getMyMqttClient().write(rawMessage);
+            } catch (MySensorsGatewayException ex) {
+                if (ex.getMessage().contains(GATEWAY_STATUS.GATEWAY_ERROR.toString())) {
+                    _logger.error("Problem with M!, RawMessage[{}], Error:[{}]", rawMessage, ex.getMessage());
+                } else {
+                    _logger.error("RawMessage[{}] throws exception while processing!, ", rawMessage, ex);
+                }
+            } catch (Exception ex) {
+                _logger.error("RawMessage[{}] throws exception while processing!, ", rawMessage, ex);
+            }
+        }
+        if (!ObjectFactory.getmyOutputMessageQueue().isEmpty()) {
+            _logger.warn("MessageMonitorThread terminating with {} message(s) in queue!", ObjectFactory
+                    .getmyOutputMessageQueue().getQueueSize());
+        }
+    }
     public void run() {
         try {
             _logger.debug("MessageMonitorThread new thread started.");
             while (!isTerminationIssued()) {
                 try {
                     this.processRawMessage();
+                    this.processOutputMessage();
                     Thread.sleep(10);
                 } catch (InterruptedException ex) {
                     _logger.debug("Exception in sleep thread,", ex);

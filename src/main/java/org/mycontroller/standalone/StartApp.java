@@ -48,6 +48,7 @@ import org.mycontroller.standalone.gateway.mqtt.MqttGatewayImpl;
 import org.mycontroller.standalone.gateway.serialport.MySensorsSerialPort;
 import org.mycontroller.standalone.mysensors.MessageMonitorThread;
 import org.mycontroller.standalone.mysensors.RawMessageQueue;
+import org.mycontroller.standalone.output.mqtt.MyMqttClient;
 import org.mycontroller.standalone.scheduler.SchedulerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,7 +186,13 @@ public class StartApp {
 
         //Start message Monitor Thread
         //Create RawMessageQueue, which is required for MessageMonitorThread
+        
+        //if AppProperties.
+        ObjectFactory.SetMyMqttClient( new MyMqttClient() );
+        ObjectFactory.setMyOutputMessageQueue(new RawMessageQueue());
+        
         ObjectFactory.setRawMessageQueue(new RawMessageQueue());
+       
         //Create new thread to monitor received logs
         MessageMonitorThread messageMonitorThread = new MessageMonitorThread();
         Thread thread = new Thread(messageMonitorThread);
@@ -206,6 +213,8 @@ public class StartApp {
             ObjectFactory.setMySensorsGateway(new MqttGatewayImpl());
         }
 
+        
+        
         // - Load starting values
         loadStartingValues();
 

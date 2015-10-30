@@ -17,6 +17,7 @@ package org.mycontroller.standalone;
 
 import org.mycontroller.standalone.gateway.IMySensorsGateway;
 import org.mycontroller.standalone.mysensors.RawMessageQueue;
+import org.mycontroller.standalone.output.mqtt.MyMqttClient;
 
 /**
  * @author Jeeva Kandasamy (jkandasa)
@@ -30,6 +31,8 @@ public class ObjectFactory {
     private static AppProperties appProperties;
     private static RawMessageQueue rawMessageQueue;
     private static IMySensorsGateway mySensorsGateway;
+    private static RawMessageQueue myOutputMessageQueue;
+    private static MyMqttClient myMqttClient;
 
     public static AppProperties getAppProperties() {
         return appProperties;
@@ -54,4 +57,23 @@ public class ObjectFactory {
     public synchronized static void setMySensorsGateway(IMySensorsGateway iSerialPort) {
         ObjectFactory.mySensorsGateway = iSerialPort;
     }
+    
+    public static RawMessageQueue getmyOutputMessageQueue() {
+        return myOutputMessageQueue;
+    }
+    
+    public static void setMyOutputMessageQueue (RawMessageQueue myOutputMessageQueue) {
+        ObjectFactory.myOutputMessageQueue =  myOutputMessageQueue;
+    }
+       
+    public static MyMqttClient getMyMqttClient()
+    {
+        return myMqttClient;
+    }
+    
+    public static void SetMyMqttClient (MyMqttClient myMqttClient)
+    {
+        ObjectFactory.myMqttClient = myMqttClient;
+    }
+    
 }

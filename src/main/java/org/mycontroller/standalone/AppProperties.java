@@ -47,7 +47,11 @@ public class AppProperties {
     private String gatewayMqttHost;
     private Integer gatewayMqttPort;
     private String gatewayMqttRootTopic;
-
+    
+    private String clinetMqttHost;
+    private Integer clinetMqttPort;
+    private String clinetMqttRootTopic;
+    
     private String dbH2DbLocation;
     private String webFileLocation;
     private boolean isWebHttpsEnabled = false;
@@ -111,9 +115,17 @@ public class AppProperties {
             throw new RuntimeException("Unknown gateway type defined! Type:" + this.gatewayType);
         }
 
+             
+        
+        this.clinetMqttHost = getValue(properties, "mcc.client.mqtt.host");
+        this.clinetMqttPort = Integer.valueOf(getValue(properties, "mcc.client.mqtt.port"));
+        this.clinetMqttRootTopic = getValue(properties, "mcc.client.mqtt.root.topic");
+          
+        
         this.dbH2DbLocation = getValue(properties, "mcc.db.h2db.location");
         this.webFileLocation = getValue(properties, "mcc.web.file.location");
         this.webHttpPort = Integer.valueOf(getValue(properties, "mcc.web.http.port"));
+        
         if (getValue(properties, "mcc.web.enable.https") != null) {
             if (Boolean.valueOf(getValue(properties, "mcc.web.enable.https"))) {
                 this.isWebHttpsEnabled = true;
@@ -269,5 +281,21 @@ public class AppProperties {
 
     public String getWebBindAddress() {
         return webBindAddress;
+    }
+    
+        
+    public String getClientMqttHost()
+    {
+        return clinetMqttHost;
+    }
+    
+    public Integer getClientMqttPort()
+    {
+        return clinetMqttPort;
+    }
+
+    public String getClientMqttRootTopic()
+    {
+        return clinetMqttRootTopic;       
     }
 }
