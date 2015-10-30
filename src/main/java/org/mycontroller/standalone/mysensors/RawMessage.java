@@ -22,6 +22,10 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import org.mycontroller.standalone.mysensors.MyMessages.MESSAGE_TYPE;
+import org.mycontroller.standalone.mysensors.MyMessages.MESSAGE_TYPE_INTERNAL;
+import org.mycontroller.standalone.mysensors.MyMessages.MESSAGE_TYPE_PRESENTATION;
+import org.mycontroller.standalone.mysensors.MyMessages.MESSAGE_TYPE_SET_REQ;
 
 /**
  * @author Jeeva Kandasamy (jkandasa)
@@ -230,6 +234,40 @@ public class RawMessage {
         return builder.toString();
     }
 
+    public String getMqttClientTopic() {
+        // Topic structure: MY_MQTT_TOPIC_PREFIX/NODE-ID/SENSOR-ID/CMD-TYPE/ACK-FLAG/SUB-TYPE
+        
+        if  ( (this.getAck() == 1) || ( this.messageType  == 4 ) ) {
+           return null;
+        }
+        
+        StringBuilder builder = new StringBuilder();
+        builder.append(ObjectFactory.getAppProperties().getClientMqttRootTopic());
+        builder.append("/").append(this.getNodeId());
+        builder.append("/").append(this.getChildSensorId());
+                
+        switch (MESSAGE_TYPE.get(this.getMessageType())) {
+            case C_PRESENTATION:                
+              builder.append("/").append( MESSAGE_TYPE_PRESENTATION.get(this.getMessageType()).name());          
+              builder.append("/").append( MESSAGE_TYPE_INTERNAL.get( this.getSubType() ).name() );
+              break;
+          case C_INTERNAL:
+             builder.append("/").append( MESSAGE_TYPE.get(this.getMessageType()).name() ); 
+             builder.append("/").append(  MESSAGE_TYPE_INTERNAL.get( this.getSubType() ).name() );
+             break;
+          case C_SET:
+              builder.append("/").append( MESSAGE_TYPE.get(this.getMessageType()).name() ); 
+              builder.append("/").append(  MESSAGE_TYPE_SET_REQ.get( this.getSubType() ).name() );
+              break;
+          case C_REQ:
+              builder.append("/").append( MESSAGE_TYPE.get(this.getMessageType()).name() ); 
+              builder.append("/").append(  MESSAGE_TYPE_SET_REQ.get( this.getSubType() ).name() );
+              break;
+        }    
+
+        return builder.toString();
+    }
+        
     public byte[] getGWBytes() {
         return this.getGWString().getBytes();
     }

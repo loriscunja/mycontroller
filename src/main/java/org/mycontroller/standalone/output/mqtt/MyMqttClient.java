@@ -61,11 +61,17 @@ public class MyMqttClient {
     }     
     
     public synchronized void write(RawMessage rawMessage) throws MySensorsGatewayException {
-        _logger.debug("Message to send, Topic:[{}], PayLoad:[{}]", rawMessage.getMqttTopic(), rawMessage.getPayload());
+        _logger.debug("Message to send, Topic:[{}], PayLoad:[{}]", rawMessage.getMqttClientTopic(), rawMessage.getPayload());
         try {
-            MqttMessage message = new MqttMessage(rawMessage.getPayloadBytes());
-            message.setQos(MY_SENSORS_QOS);
-            _mqttClient.publish(rawMessage.getMqttTopic(), message);
+            String _topic;
+            
+            _topic = rawMessage.getMqttClientTopic();
+            if ( _topic != null && !_topic.isEmpty() ) {
+                    MqttMessage message = new MqttMessage(rawMessage.getPayloadBytes());
+                    message.setQos(MY_SENSORS_QOS);
+                    _mqttClient.publish(_topic, message);                     
+            }
+
         } catch (MqttException ex) {
             if (ex.getMessage().contains("Timed out waiting for a response from the server")) {
                 _logger.debug(ex.getMessage());
